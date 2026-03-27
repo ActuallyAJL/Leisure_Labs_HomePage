@@ -1,26 +1,28 @@
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { useAuth } from "../src/auth/AuthProvider";
 
-export default function LockScreen() {
-  const { isAuthenticated, loading } = useAuth();
+export default function SignInScreen() {
+  const { signIn, isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
       router.replace("/(protected)/home");
+      return;
     }
-  }, [loading, isAuthenticated]);
+
+    if (!loading && !isAuthenticated) {
+      signIn().catch((err) => {
+        console.error("signIn failed", err);
+        router.replace("/");
+      });
+    }
+  }, [loading, isAuthenticated, signIn]);
 
   return (
     <View style={styles.container}>
-      <Pressable
-        onPress={() => router.push("/sign-in")}
-        style={styles.lockButton}
-      >
-        <Ionicons name="lock-closed" size={84} color="white" />
-      </Pressable>
+      <ActivityIndicator color="white" />
     </View>
   );
 }
@@ -31,8 +33,5 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
     alignItems: "center",
     justifyContent: "center",
-  },
-  lockButton: {
-    padding: 24,
   },
 });
